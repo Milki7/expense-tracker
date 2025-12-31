@@ -24,7 +24,7 @@ func (s *expenseService) AddExpense(expense *models.Expense) error {
 	if expense.Title == "" {
 		return errors.New("Expense title is required")
 	}
-	return s.repo.Created(expense)
+	return s.repo.Create(expense)
 }
 
 func (s *expenseService) FetchAllExpense() ([]models.Expense, error) {

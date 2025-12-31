@@ -7,7 +7,7 @@ import (
 )
 
 type ExpenseRepository interface {
-	Created(expense *models.Expense) error
+	Create(expense *models.Expense) error
 	GetAll() ([]models.Expense, error)
 }
 type sqliteRepo struct {
