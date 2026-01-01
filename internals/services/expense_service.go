@@ -8,7 +8,7 @@ import (
 
 type ExpenseService interface {
 	AddExpense(expense *models.Expense) error
-	FetchAllExpense() ([]models.Expense, error)
+	FetchAllExpenses() ([]models.Expense, error)
 }
 type expenseService struct {
 	repo repositories.ExpenseRepository
@@ -27,6 +27,6 @@ func (s *expenseService) AddExpense(expense *models.Expense) error {
 	return s.repo.Create(expense)
 }
 
-func (s *expenseService) FetchAllExpense() ([]models.Expense, error) {
+func (s *expenseService) FetchAllExpenses() ([]models.Expense, error) {
 	return s.repo.GetAll()
 }

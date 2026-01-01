@@ -22,11 +22,15 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 		return
 	}
+	if err := h.services.AddExpense(&expense); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, expense)
 
 }
 func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
-	expenses, err := h.services.FetchAllExpense()
+	expenses, err := h.services.FetchAllExpenses()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch expenses"})
 		return
