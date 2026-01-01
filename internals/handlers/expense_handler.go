@@ -4,6 +4,7 @@ import (
 	"expense-tracker/internals/models"
 	"expense-tracker/internals/services"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,4 +37,19 @@ func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, expenses)
+}
+
+func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
+	paramId := c.Param("id")
+
+	id, err := strconv.ParseUint(paramId, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+	if err := h.services.RemoveExpense(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Expense deleted successfully"})
 }

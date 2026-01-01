@@ -21,6 +21,7 @@ func main() {
 	{
 		api.POST("/expenses", expenseHandler.CreateExpense)
 		api.GET("/expenses", expenseHandler.GetExpenses)
+		api.DELETE("/expenses/:id", expenseHandler.DeleteExpense)
 	}
 
 	r.Run(":8080")

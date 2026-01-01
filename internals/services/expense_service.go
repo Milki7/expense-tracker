@@ -9,6 +9,7 @@ import (
 type ExpenseService interface {
 	AddExpense(expense *models.Expense) error
 	FetchAllExpenses() ([]models.Expense, error)
+	RemoveExpense(id uint) error
 }
 type expenseService struct {
 	repo repositories.ExpenseRepository
@@ -29,4 +30,11 @@ func (s *expenseService) AddExpense(expense *models.Expense) error {
 
 func (s *expenseService) FetchAllExpenses() ([]models.Expense, error) {
 	return s.repo.GetAll()
+}
+func (s *expenseService) RemoveExpense(id uint) error {
+	if id == 0 {
+		return errors.New("Invalid expense ID")
+	}
+	return s.repo.RemoveExpense(id)
+
 }
