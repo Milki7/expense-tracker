@@ -53,3 +53,24 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Expense deleted successfully"})
 }
+func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
+	paramID := c.Param("id")
+	id, err := strconv.ParseUint(paramID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var expense models.Expense
+	if err := c.ShouldBindJSON(&expense); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.services.UpdateExpense(uint(id), &expense); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Expense updated successfully"})
+}

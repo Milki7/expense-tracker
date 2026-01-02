@@ -10,7 +10,9 @@ type ExpenseRepository interface {
 	Create(expense *models.Expense) error
 	GetAll() ([]models.Expense, error)
 	RemoveExpense(id uint) error
+	Update(id uint, updatedData *models.Expense) error
 }
+
 type sqliteRepo struct {
 	db *gorm.DB
 }
@@ -28,4 +30,7 @@ func (r *sqliteRepo) GetAll() ([]models.Expense, error) {
 }
 func (r *sqliteRepo) RemoveExpense(id uint) error {
 	return r.db.Delete(&models.Expense{}, id).Error
+}
+func (r *sqliteRepo) Update(id uint, updatedData *models.Expense) error {
+	return r.db.Model(&models.Expense{}).Where("id = ?", id).Updates(updatedData).Error
 }

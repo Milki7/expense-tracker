@@ -10,6 +10,7 @@ type ExpenseService interface {
 	AddExpense(expense *models.Expense) error
 	FetchAllExpenses() ([]models.Expense, error)
 	RemoveExpense(id uint) error
+	UpdateExpense(id uint, expense *models.Expense) error
 }
 type expenseService struct {
 	repo repositories.ExpenseRepository
@@ -37,4 +38,14 @@ func (s *expenseService) RemoveExpense(id uint) error {
 	}
 	return s.repo.RemoveExpense(id)
 
+}
+func (s *expenseService) UpdateExpense(id uint, expense *models.Expense) error {
+	if id == 0 {
+		return errors.New("invalid ID")
+	}
+	// Business Rule: You can't update an expense to have a negative amount
+	if expense.Amount < 0 {
+		return errors.New("amount cannot be negative")
+	}
+	return s.repo.Update(id, expense)
 }
