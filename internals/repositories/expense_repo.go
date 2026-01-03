@@ -11,6 +11,7 @@ type ExpenseRepository interface {
 	GetAll() ([]models.Expense, error)
 	RemoveExpense(id uint) error
 	Update(id uint, updatedData *models.Expense) error
+	Search(category string, title string) ([]models.Expense, error)
 }
 
 type sqliteRepo struct {
@@ -33,4 +34,21 @@ func (r *sqliteRepo) RemoveExpense(id uint) error {
 }
 func (r *sqliteRepo) Update(id uint, updatedData *models.Expense) error {
 	return r.db.Model(&models.Expense{}).Where("id = ?", id).Updates(updatedData).Error
+}
+func (r *sqliteRepo) Search(category string, title string) ([]models.Expense, error) {
+	var expenses []models.Expense
+	query := r.db.Model(&models.Expense{})
+
+	// If the user provided a category, filter by it
+	if category != "" {
+		query = query.Where("category = ?", category)
+	}
+
+	// If the user provided a title, search for titles containing that text
+	if title != "" {
+		query = query.Where("title LIKE ?", "%"+title+"%")
+	}
+
+	err := query.Find(&expenses).Error
+	return expenses, err
 }

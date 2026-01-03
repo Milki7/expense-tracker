@@ -31,9 +31,13 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 
 }
 func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
-	expenses, err := h.services.FetchAllExpenses()
+	category := c.Query("category")
+	title := c.Query("title")
+
+	expenses, err := h.services.SearchExpenses(category, title)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch expenses"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Search failed"})
 		return
 	}
 	c.JSON(http.StatusOK, expenses)

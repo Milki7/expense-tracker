@@ -11,6 +11,7 @@ type ExpenseService interface {
 	FetchAllExpenses() ([]models.Expense, error)
 	RemoveExpense(id uint) error
 	UpdateExpense(id uint, expense *models.Expense) error
+	SearchExpenses(category string, title string) ([]models.Expense, error)
 }
 type expenseService struct {
 	repo repositories.ExpenseRepository
@@ -48,4 +49,8 @@ func (s *expenseService) UpdateExpense(id uint, expense *models.Expense) error {
 		return errors.New("amount cannot be negative")
 	}
 	return s.repo.Update(id, expense)
+}
+
+func (s *expenseService) SearchExpenses(category string, title string) ([]models.Expense, error) {
+	return s.repo.Search(category, title)
 }
