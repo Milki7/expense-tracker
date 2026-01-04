@@ -12,6 +12,7 @@ type ExpenseRepository interface {
 	RemoveExpense(id uint) error
 	Update(id uint, updatedData *models.Expense) error
 	Search(category string, title string) ([]models.Expense, error)
+	GetTotalAmount() (float64, error)
 }
 
 type sqliteRepo struct {
@@ -51,4 +52,10 @@ func (r *sqliteRepo) Search(category string, title string) ([]models.Expense, er
 
 	err := query.Find(&expenses).Error
 	return expenses, err
+}
+func (r *sqliteRepo) GetTotalAmount() (float64, error) {
+	var total float64
+	// This runs: SELECT sum(amount) FROM expenses
+	err := r.db.Model(&models.Expense{}).Select("sum(amount)").Scan(&total).Error
+	return total, err
 }

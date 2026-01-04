@@ -78,3 +78,15 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Expense updated successfully"})
 }
+func (h *ExpenseHandler) GetSummary(c *gin.Context) {
+	total, err := h.services.GetSummary()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not calculate summary"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total_spending": total,
+		"currency":       "USD",
+	})
+}

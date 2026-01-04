@@ -12,6 +12,7 @@ type ExpenseService interface {
 	RemoveExpense(id uint) error
 	UpdateExpense(id uint, expense *models.Expense) error
 	SearchExpenses(category string, title string) ([]models.Expense, error)
+	GetSummary() (float64, error)
 }
 type expenseService struct {
 	repo repositories.ExpenseRepository
@@ -53,4 +54,7 @@ func (s *expenseService) UpdateExpense(id uint, expense *models.Expense) error {
 
 func (s *expenseService) SearchExpenses(category string, title string) ([]models.Expense, error) {
 	return s.repo.Search(category, title)
+}
+func (s *expenseService) GetSummary() (float64, error) {
+	return s.repo.GetTotalAmount()
 }

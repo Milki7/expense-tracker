@@ -21,6 +21,7 @@ func main() {
 	{
 		api.POST("/expenses", expenseHandler.CreateExpense)
 		api.GET("/expenses", expenseHandler.GetExpenses)
+		api.GET("/expenses/summary", expenseHandler.GetSummary)
 		api.DELETE("/expenses/:id", expenseHandler.DeleteExpense)
 		api.PUT("/expenses/:id", expenseHandler.UpdateExpense)
 	}
