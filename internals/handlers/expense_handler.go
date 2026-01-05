@@ -20,7 +20,10 @@ func NewExpensehandler(services services.ExpenseService) *ExpenseHandler {
 func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 	var expense models.Expense
 	if err := c.ShouldBindJSON(&expense); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Validation failed",
+			"details": err.Error(),
+		})
 		return
 	}
 	if err := h.services.AddExpense(&expense); err != nil {

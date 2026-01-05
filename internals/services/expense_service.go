@@ -28,6 +28,9 @@ func (s *expenseService) AddExpense(expense *models.Expense) error {
 	if expense.Title == "" {
 		return errors.New("Expense title is required")
 	}
+	if len(expense.Category) < 3 {
+		return errors.New("category name is too short")
+	}
 	return s.repo.Create(expense)
 }
 
