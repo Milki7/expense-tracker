@@ -93,3 +93,12 @@ func (h *ExpenseHandler) GetSummary(c *gin.Context) {
 		"currency":       "USD",
 	})
 }
+func (h *ExpenseHandler) GetCategorySummary(c *gin.Context) {
+	stats, err := h.services.GetCategoryStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate stats"})
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
+}

@@ -13,10 +13,15 @@ type ExpenseRepository interface {
 	Update(id uint, updatedData *models.Expense) error
 	Search(category string, title string) ([]models.Expense, error)
 	GetTotalAmount() (float64, error)
+	GetCategorySummary() ([]CategorySummary, error)
 }
 
 type sqliteRepo struct {
 	db *gorm.DB
+}
+type CategorySummary struct {
+	Category string  `json:"category"`
+	Total    float64 `json:"total"`
 }
 
 func NewExpenseRepository(db *gorm.DB) ExpenseRepository {
@@ -58,4 +63,15 @@ func (r *sqliteRepo) GetTotalAmount() (float64, error) {
 	// This runs: SELECT sum(amount) FROM expenses
 	err := r.db.Model(&models.Expense{}).Select("sum(amount)").Scan(&total).Error
 	return total, err
+}
+func (r *sqliteRepo) GetCategorySummary() ([]CategorySummary, error) {
+	var summaries []CategorySummary
+
+	// SQL: SELECT category, sum(amount) as total FROM expenses GROUP BY category
+	err := r.db.Model(&models.Expense{}).
+		Select("category, sum(amount) as total").
+		Group("category").
+		Scan(&summaries).Error
+
+	return summaries, err
 }
