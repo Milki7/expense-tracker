@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"encoding/csv"
 	"expense-tracker/internals/models"
 	"expense-tracker/internals/services"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -101,4 +103,33 @@ func (h *ExpenseHandler) GetCategorySummary(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, stats)
+}
+func (h *ExpenseHandler) ExportCSV(c *gin.Context) {
+	expenses, err := h.services.FetchAllExpenses()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
+		return
+	}
+
+	// Set headers so the browser knows it's a file download
+	c.Header("Content-Disposition", "attachment; filename=expenses.csv")
+	c.Header("Content-Type", "text/csv")
+
+	writer := csv.NewWriter(c.Writer)
+	defer writer.Flush()
+
+	// Write CSV Header
+	writer.Write([]string{"ID", "Title", "Amount", "Category", "Date"})
+
+	// Write Data Rows
+	for _, e := range expenses {
+		row := []string{
+			fmt.Sprintf("%d", e.ID),
+			e.Title,
+			fmt.Sprintf("%.2f", e.Amount),
+			e.Category,
+			e.CreatedAt.Format("2006-01-02"),
+		}
+		writer.Write(row)
+	}
 }

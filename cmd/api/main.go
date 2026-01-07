@@ -25,6 +25,7 @@ func main() {
 		api.DELETE("/expenses/:id", expenseHandler.DeleteExpense)
 		api.PUT("/expenses/:id", expenseHandler.UpdateExpense)
 		api.GET("/expenses/categories", expenseHandler.GetCategorySummary)
+		api.GET("/expenses/export", expenseHandler.ExportCSV)
 	}
 
 	r.Run(":8080")
