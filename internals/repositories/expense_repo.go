@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"expense-tracker/internals/models"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -14,6 +15,7 @@ type ExpenseRepository interface {
 	Search(category string, title string) ([]models.Expense, error)
 	GetTotalAmount() (float64, error)
 	GetCategorySummary() ([]CategorySummary, error)
+	GetAllSorted(sortBy string, order string) ([]models.Expense, error)
 }
 
 type sqliteRepo struct {
@@ -41,18 +43,24 @@ func (r *sqliteRepo) RemoveExpense(id uint) error {
 func (r *sqliteRepo) Update(id uint, updatedData *models.Expense) error {
 	return r.db.Model(&models.Expense{}).Where("id = ?", id).Updates(updatedData).Error
 }
-func (r *sqliteRepo) Search(category string, title string) ([]models.Expense, error) {
+
+// 1. Update the signature to accept sortBy and order strings
+func (r *sqliteRepo) Search(category string, title string, sortBy string, order string) ([]models.Expense, error) {
 	var expenses []models.Expense
 	query := r.db.Model(&models.Expense{})
 
-	// If the user provided a category, filter by it
 	if category != "" {
 		query = query.Where("category = ?", category)
 	}
 
-	// If the user provided a title, search for titles containing that text
 	if title != "" {
 		query = query.Where("title LIKE ?", "%"+title+"%")
+	}
+
+	// 2. Add the Sorting logic
+	// GORM's Order method takes a string like "amount desc"
+	if sortBy != "" && order != "" {
+		query = query.Order(sortBy + " " + order)
 	}
 
 	err := query.Find(&expenses).Error
@@ -60,18 +68,32 @@ func (r *sqliteRepo) Search(category string, title string) ([]models.Expense, er
 }
 func (r *sqliteRepo) GetTotalAmount() (float64, error) {
 	var total float64
-	// This runs: SELECT sum(amount) FROM expenses
+
 	err := r.db.Model(&models.Expense{}).Select("sum(amount)").Scan(&total).Error
 	return total, err
 }
 func (r *sqliteRepo) GetCategorySummary() ([]CategorySummary, error) {
 	var summaries []CategorySummary
 
-	// SQL: SELECT category, sum(amount) as total FROM expenses GROUP BY category
 	err := r.db.Model(&models.Expense{}).
 		Select("category, sum(amount) as total").
 		Group("category").
 		Scan(&summaries).Error
 
 	return summaries, err
+}
+func (r *sqliteRepo) GetAllSorted(sortBy string, order string) ([]models.Expense, error) {
+	var expenses []models.Expense
+
+	if sortBy == "" {
+		sortBy = "created_at"
+	}
+	if order == "" {
+		order = "desc"
+	}
+
+	orderQuery := fmt.Sprintf("%s %s", sortBy, order)
+
+	err := r.db.Order(orderQuery).Find(&expenses).Error
+	return expenses, err
 }

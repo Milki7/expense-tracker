@@ -39,10 +39,15 @@ func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 	category := c.Query("category")
 	title := c.Query("title")
 
-	expenses, err := h.services.SearchExpenses(category, title)
+	// New: Capture sorting from URL or use defaults
+	sortBy := c.DefaultQuery("sort", "created_at")
+	order := c.DefaultQuery("order", "desc")
+
+	// Updated: Pass 4 arguments instead of 2
+	expenses, err := h.services.SearchExpenses(category, title, sortBy, order)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Search failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Search/Sort failed"})
 		return
 	}
 	c.JSON(http.StatusOK, expenses)

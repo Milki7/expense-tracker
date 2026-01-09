@@ -11,7 +11,7 @@ type ExpenseService interface {
 	FetchAllExpenses() ([]models.Expense, error)
 	RemoveExpense(id uint) error
 	UpdateExpense(id uint, expense *models.Expense) error
-	SearchExpenses(category string, title string) ([]models.Expense, error)
+	SearchExpenses(category, title, sortBy, order string) ([]models.Expense, error)
 	GetSummary() (float64, error)
 	GetCategoryStats() ([]repositories.CategorySummary, error)
 }
@@ -49,7 +49,7 @@ func (s *expenseService) UpdateExpense(id uint, expense *models.Expense) error {
 	if id == 0 {
 		return errors.New("invalid ID")
 	}
-	// Business Rule: You can't update an expense to have a negative amount
+
 	if expense.Amount < 0 {
 		return errors.New("amount cannot be negative")
 	}
@@ -58,10 +58,25 @@ func (s *expenseService) UpdateExpense(id uint, expense *models.Expense) error {
 
 func (s *expenseService) SearchExpenses(category string, title string) ([]models.Expense, error) {
 	return s.repo.Search(category, title)
+	return s.repo.Search(category, title, sortBy, order)
 }
 func (s *expenseService) GetSummary() (float64, error) {
 	return s.repo.GetTotalAmount()
 }
 func (s *expenseService) GetCategoryStats() ([]repositories.CategorySummary, error) {
 	return s.repo.GetCategorySummary()
+}
+func (s *expenseService) FetchSortedExpenses(sortBy string, order string) ([]models.Expense, error) {
+
+	allowedColumns := map[string]bool{"amount": true, "title": true, "created_at": true, "category": true}
+
+	if !allowedColumns[sortBy] {
+		sortBy = "created_at"
+	}
+
+	if order != "asc" && order != "desc" {
+		order = "desc"
+	}
+
+	return s.repo.GetAllSorted(sortBy, order)
 }
