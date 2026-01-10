@@ -8,10 +8,9 @@ import (
 
 type ExpenseService interface {
 	AddExpense(expense *models.Expense) error
-	FetchAllExpenses() ([]models.Expense, error)
 	RemoveExpense(id uint) error
 	UpdateExpense(id uint, expense *models.Expense) error
-	SearchExpenses(category, title, sortBy, order string) ([]models.Expense, error)
+	SearchExpenses(category string, title string, sortBy string, order string) ([]models.Expense, error)
 	GetSummary() (float64, error)
 	GetCategoryStats() ([]repositories.CategorySummary, error)
 }
@@ -35,9 +34,6 @@ func (s *expenseService) AddExpense(expense *models.Expense) error {
 	return s.repo.Create(expense)
 }
 
-func (s *expenseService) FetchAllExpenses() ([]models.Expense, error) {
-	return s.repo.GetAll()
-}
 func (s *expenseService) RemoveExpense(id uint) error {
 	if id == 0 {
 		return errors.New("Invalid expense ID")
@@ -55,20 +51,14 @@ func (s *expenseService) UpdateExpense(id uint, expense *models.Expense) error {
 	}
 	return s.repo.Update(id, expense)
 }
-
-func (s *expenseService) SearchExpenses(category string, title string) ([]models.Expense, error) {
-	return s.repo.Search(category, title)
-	return s.repo.Search(category, title, sortBy, order)
-}
-func (s *expenseService) GetSummary() (float64, error) {
-	return s.repo.GetTotalAmount()
-}
-func (s *expenseService) GetCategoryStats() ([]repositories.CategorySummary, error) {
-	return s.repo.GetCategorySummary()
-}
-func (s *expenseService) FetchSortedExpenses(sortBy string, order string) ([]models.Expense, error) {
-
-	allowedColumns := map[string]bool{"amount": true, "title": true, "created_at": true, "category": true}
+func (s *expenseService) SearchExpenses(category, title, sortBy, order string) ([]models.Expense, error) {
+	// 1. Security: Check if the column exists in our database
+	allowedColumns := map[string]bool{
+		"amount":     true,
+		"title":      true,
+		"created_at": true,
+		"category":   true,
+	}
 
 	if !allowedColumns[sortBy] {
 		sortBy = "created_at"
@@ -78,5 +68,12 @@ func (s *expenseService) FetchSortedExpenses(sortBy string, order string) ([]mod
 		order = "desc"
 	}
 
-	return s.repo.GetAllSorted(sortBy, order)
+	// 2. Data Access: Call the repository
+	return s.repo.Search(category, title, sortBy, order)
+}
+func (s *expenseService) GetSummary() (float64, error) {
+	return s.repo.GetTotalAmount()
+}
+func (s *expenseService) GetCategoryStats() ([]repositories.CategorySummary, error) {
+	return s.repo.GetCategorySummary()
 }

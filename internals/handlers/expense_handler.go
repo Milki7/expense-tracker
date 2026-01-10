@@ -39,13 +39,12 @@ func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 	category := c.Query("category")
 	title := c.Query("title")
 
-	// New: Capture sorting from URL or use defaults
+	// Capture sorting from URL or use defaults
 	sortBy := c.DefaultQuery("sort", "created_at")
 	order := c.DefaultQuery("order", "desc")
 
-	// Updated: Pass 4 arguments instead of 2
+	// Call the unified search service
 	expenses, err := h.services.SearchExpenses(category, title, sortBy, order)
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Search/Sort failed"})
 		return
@@ -110,23 +109,20 @@ func (h *ExpenseHandler) GetCategorySummary(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 func (h *ExpenseHandler) ExportCSV(c *gin.Context) {
-	expenses, err := h.services.FetchAllExpenses()
+	expenses, err := h.services.SearchExpenses("", "", "created_at", "desc")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
 		return
 	}
 
-	// Set headers so the browser knows it's a file download
 	c.Header("Content-Disposition", "attachment; filename=expenses.csv")
 	c.Header("Content-Type", "text/csv")
 
 	writer := csv.NewWriter(c.Writer)
 	defer writer.Flush()
 
-	// Write CSV Header
 	writer.Write([]string{"ID", "Title", "Amount", "Category", "Date"})
 
-	// Write Data Rows
 	for _, e := range expenses {
 		row := []string{
 			fmt.Sprintf("%d", e.ID),

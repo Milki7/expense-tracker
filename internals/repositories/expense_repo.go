@@ -2,20 +2,17 @@ package repositories
 
 import (
 	"expense-tracker/internals/models"
-	"fmt"
 
 	"gorm.io/gorm"
 )
 
 type ExpenseRepository interface {
 	Create(expense *models.Expense) error
-	GetAll() ([]models.Expense, error)
 	RemoveExpense(id uint) error
 	Update(id uint, updatedData *models.Expense) error
-	Search(category string, title string) ([]models.Expense, error)
+	Search(category string, title string, sortBy string, order string) ([]models.Expense, error)
 	GetTotalAmount() (float64, error)
 	GetCategorySummary() ([]CategorySummary, error)
-	GetAllSorted(sortBy string, order string) ([]models.Expense, error)
 }
 
 type sqliteRepo struct {
@@ -32,11 +29,7 @@ func NewExpenseRepository(db *gorm.DB) ExpenseRepository {
 func (r *sqliteRepo) Create(expense *models.Expense) error {
 	return r.db.Create(expense).Error
 }
-func (r *sqliteRepo) GetAll() ([]models.Expense, error) {
-	var expenses []models.Expense
-	err := r.db.Find(&expenses).Error
-	return expenses, err
-}
+
 func (r *sqliteRepo) RemoveExpense(id uint) error {
 	return r.db.Delete(&models.Expense{}, id).Error
 }
@@ -49,6 +42,7 @@ func (r *sqliteRepo) Search(category string, title string, sortBy string, order 
 	var expenses []models.Expense
 	query := r.db.Model(&models.Expense{})
 
+	// Filtering
 	if category != "" {
 		query = query.Where("category = ?", category)
 	}
@@ -57,8 +51,7 @@ func (r *sqliteRepo) Search(category string, title string, sortBy string, order 
 		query = query.Where("title LIKE ?", "%"+title+"%")
 	}
 
-	// 2. Add the Sorting logic
-	// GORM's Order method takes a string like "amount desc"
+	// Sorting (e.g., "amount desc")
 	if sortBy != "" && order != "" {
 		query = query.Order(sortBy + " " + order)
 	}
@@ -81,19 +74,4 @@ func (r *sqliteRepo) GetCategorySummary() ([]CategorySummary, error) {
 		Scan(&summaries).Error
 
 	return summaries, err
-}
-func (r *sqliteRepo) GetAllSorted(sortBy string, order string) ([]models.Expense, error) {
-	var expenses []models.Expense
-
-	if sortBy == "" {
-		sortBy = "created_at"
-	}
-	if order == "" {
-		order = "desc"
-	}
-
-	orderQuery := fmt.Sprintf("%s %s", sortBy, order)
-
-	err := r.db.Order(orderQuery).Find(&expenses).Error
-	return expenses, err
 }
