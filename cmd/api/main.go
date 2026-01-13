@@ -6,6 +6,7 @@ import (
 	"expense-tracker/internals/repositories"
 	"expense-tracker/internals/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +17,10 @@ func main() {
 	expenseHandler := handlers.NewExpensehandler(expenseService)
 
 	r := gin.Default()
+
+	r.Use(cors.Default())
+
+	r.Static("/ui", "./web")
 
 	api := r.Group("/api/v1")
 	{
