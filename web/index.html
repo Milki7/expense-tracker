@@ -1,54 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Expense Tracker Frontend</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker Pro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <style>
-        body { font-family: sans-serif; margin: 40px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .summary { font-size: 1.2em; font-weight: bold; color: #2c3e50; }
+        .actions { display: flex; gap: 5px; }
+        .edit-btn { background-color: #f39c12; }
+        .delete-btn { background-color: #e74c3c; }
+        .summary-box { background: #f4f4f4; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <h1>My Expenses</h1>
-    <div id="summary" class="summary">Loading total...</div>
 
-    <table id="expense-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <h1>Expense Tracker</h1>
 
-    <script>
-        // Fetch Total Summary
-        fetch('http://localhost:8080/api/v1/expenses/summary')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('summary').innerText = `Total Spending: $${data.total_spending}`;
-            });
+    <div class="summary-box">
+        <span id="total-spending">Total Spending: $0.00</span>
+    </div>
 
-        // Fetch Expense List
-        fetch('http://localhost:8080/api/v1/expenses?sort=created_at&order=desc')
-            .then(res => res.json())
-            .then(expenses => {
-                const tbody = document.querySelector('#expense-table tbody');
-                expenses.forEach(exp => {
-                    const row = `<tr>
-                        <td>${new Date(exp.CreatedAt).toLocaleDateString()}</td>
-                        <td>${exp.title}</td>
-                        <td>${exp.category}</td>
-                        <td>$${exp.amount.toFixed(2)}</td>
-                    </tr>`;
-                    tbody.innerHTML += row;
-                });
-            });
-    </script>
+    <section>
+        <h3 id="form-title">Add New Expense</h3>
+        <form id="expense-form">
+            <input type="hidden" id="expense-id">
+            <input type="text" id="title" placeholder="Title (e.g. Lunch)" required>
+            <input type="number" id="amount" placeholder="Amount" step="0.01" required>
+            <input type="text" id="category" placeholder="Category (e.g. Food)" required>
+            <button type="submit" id="submit-btn">Save Expense</button>
+            <button type="button" id="cancel-btn" style="display:none;">Cancel</button>
+        </form>
+    </section>
+
+    <hr>
+
+    <section>
+        <h3>All Expenses</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="expense-list">
+                </tbody>
+        </table>
+    </section>
+
+    <script src="app.js"></script>
 </body>
 </html>
