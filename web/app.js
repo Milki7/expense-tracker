@@ -94,6 +94,25 @@ function resetForm() {
     document.getElementById('cancel-btn').style.display = 'none';
 }
 
+// --- EXPORT: Trigger CSV Download ---
+document.getElementById('export-btn').addEventListener('click', () => {
+    
+    window.location.href = 'http://localhost:8080/api/v1/expenses/export';
+});
+
+document.getElementById('search-btn').addEventListener('click', () => {
+    const title = document.getElementById('search-title').value;
+    const sortBy = document.getElementById('sort-by').value;
+    
+    // Construct URL with query params
+    const queryUrl = `${API_URL}?title=${title}&sort=${sortBy}&order=desc`;
+    
+    fetch(queryUrl)
+        .then(res => res.json())
+        .then(data => displayExpenses(data));
+});
+
+
 document.getElementById('cancel-btn').onclick = resetForm;
 
 // Initial Load

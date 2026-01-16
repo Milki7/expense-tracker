@@ -15,7 +15,22 @@
 <body>
 
     <h1>Expense Tracker</h1>
-
+    
+    <section>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>All Expenses</h3>
+        <button id="export-btn" style="background-color: #27ae60;">📥 Export to CSV</button>
+    </div>
+    </section>
+    <div style="background: #eee; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: flex; gap: 10px;">
+    <input type="text" id="search-title" placeholder="Search title..." style="margin:0;">
+    <select id="sort-by" style="margin:0;">
+        <option value="created_at">Sort by Date</option>
+        <option value="amount">Sort by Price</option>
+        <option value="title">Sort by Name</option>
+    </select>
+    <button id="search-btn" style="margin:0;">Apply</button>
+</div>
     <div class="summary-box">
         <span id="total-spending">Total Spending: $0.00</span>
     </div>
